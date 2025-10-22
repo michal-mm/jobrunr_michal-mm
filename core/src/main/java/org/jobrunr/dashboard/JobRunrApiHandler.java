@@ -1,5 +1,6 @@
 package org.jobrunr.dashboard;
 
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
 import org.jobrunr.dashboard.server.http.RestHttpHandler;
 import org.jobrunr.dashboard.server.http.handlers.HttpRequestHandler;
 import org.jobrunr.dashboard.ui.model.RecurringJobUIModel;
@@ -52,7 +53,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
         get("/servers", getBackgroundJobServers());
         get("/version", getVersion());
 
-        withExceptionMapping(JobNotFoundException.class, (exc, resp) -> resp.statusCode(404));
+        withExceptionMapping(JobNotFoundException.class, (exc, resp) -> resp.statusCode(HttpStatusCode.NOT_FOUND.getCode()));
     }
 
     private HttpRequestHandler getMetadataByNameAndOwner() {
@@ -61,13 +62,13 @@ public class JobRunrApiHandler extends RestHttpHandler {
             String owner = request.param(":owner");
 
             if (isNullOrEmpty(name) || isNullOrEmpty(owner)) {
-                response.statusCode(404);
+                response.statusCode(HttpStatusCode.NOT_FOUND.getCode());
                 return;
             }
 
             JobRunrMetadata metadata = storageProvider.getMetadata(name, owner);
             if (metadata == null) {
-                response.statusCode(404);
+                response.statusCode(HttpStatusCode.NOT_FOUND.getCode());
             } else {
                 String format = request.queryParam("format", String.class, null);
                 if ("jsonValue" .equals(format)) {
@@ -88,7 +89,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
     private HttpRequestHandler deleteProblemByType() {
         return (request, response) -> {
             problemsManager().dismissProblemOfType(request.param(":type", String.class));
-            response.statusCode(204);
+            response.statusCode(HttpStatusCode.NO_CONTENT.getCode());
         };
     }
 
@@ -101,7 +102,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
             final Job job = storageProvider.getJobById(request.param(":id", UUID.class));
             job.delete("Job deleted via Dashboard");
             storageProvider.save(job);
-            response.statusCode(204);
+            response.statusCode(HttpStatusCode.NO_CONTENT.getCode());
         };
     }
 
@@ -110,7 +111,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
             final Job job = storageProvider.getJobById(request.param(":id", UUID.class));
             job.enqueue();
             storageProvider.save(job);
-            response.statusCode(204);
+            response.statusCode(HttpStatusCode.NO_CONTENT.getCode());
         };
     }
 
@@ -145,7 +146,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
             if (deleted == 0) {
                 throw new JobNotFoundException(jobId);
             }
-            response.statusCode(204);
+            response.statusCode(HttpStatusCode.NO_CONTENT.getCode());
         };
     }
 
@@ -159,7 +160,7 @@ public class JobRunrApiHandler extends RestHttpHandler {
 
             final Job job = recurringJob.toEnqueuedJob();
             storageProvider.save(job);
-            response.statusCode(204);
+            response.statusCode(HttpStatusCode.NO_CONTENT.getCode());
         };
     }
 

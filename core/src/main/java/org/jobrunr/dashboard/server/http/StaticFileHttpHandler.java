@@ -53,16 +53,16 @@ public class StaticFileHttpHandler extends AbstractHttpExchangeHandler {
                 if (toServe.endsWith(".html")) {
                     final String nonce = UUID.randomUUID().toString();
                     httpExchange.getResponseHeaders().add("Content-Security-Policy", "script-src 'nonce-" + nonce + "' 'strict-dynamic';object-src 'none';base-uri 'none'");
-                    httpExchange.sendResponseHeaders(200, 0);
+                    httpExchange.sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
                     copyHtmlResourceToResponseBody(resource, httpExchange, nonce);
                 } else {
                     httpExchange.getResponseHeaders().add("Cache-Control", "public, max-age=604800");
                     httpExchange.getResponseHeaders().add("Content-Security-Policy", "base-uri 'none'; default-src 'none'");
-                    httpExchange.sendResponseHeaders(200, 0);
+                    httpExchange.sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
                     copyResourceToResponseBody(resource, httpExchange);
                 }
             } else {
-                httpExchange.sendResponseHeaders(404, -1);
+                httpExchange.sendResponseHeaders(HttpStatusCode.NOT_FOUND.getCode(), -1);
             }
         } catch (Exception shouldNotHappen) {
             LOGGER.error("Error serving static files", shouldNotHappen);

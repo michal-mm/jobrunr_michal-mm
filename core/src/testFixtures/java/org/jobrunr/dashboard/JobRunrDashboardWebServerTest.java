@@ -1,6 +1,7 @@
 package org.jobrunr.dashboard;
 
 import org.jobrunr.SevereJobRunrException;
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
 import org.jobrunr.dashboard.server.http.client.TeenyHttpClient;
 import org.jobrunr.dashboard.ui.model.VersionUIModel;
 import org.jobrunr.dashboard.ui.model.problems.SevereJobRunrExceptionProblem;
@@ -71,7 +72,7 @@ abstract class JobRunrDashboardWebServerTest {
         // This tests whether the response body is valid JSON
         var version = new JacksonJsonMapper().deserialize(getResponse.body(), VersionUIModel.class);
 
-        assertThat(getResponse.statusCode()).isEqualTo(200);
+        assertThat(getResponse.statusCode()).isEqualTo(HttpStatusCode.OK.getCode());
         assertThat(version.isAllowAnonymousDataUsage()).isFalse();
         assertThat(getResponse.headers().firstValue("Cache-Control")).isEqualTo(Optional.of("no-cache, no-store, private"));
     }
@@ -88,7 +89,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getByNameAndOwnerAsJsonValueResponse = http.get("/api/metadata/%s/%s", "my-name", "owner-2");
         assertThat(getByNameAndOwnerAsJsonValueResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasJsonBody(
                         json -> json.inPath("name").isEqualTo("my-name"),
                         json -> json.inPath("owner").isEqualTo("owner-2"),
@@ -96,12 +97,12 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getByNameAndOwnerResponse = http.get("/api/metadata/%s/%s?format=jsonValue", "my-other-name", "my-other-owner");
         assertThat(getByNameAndOwnerResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasJsonBody("{\"key\": \"value\"}");
 
         HttpResponse<String> getUnavailableByNameAndOwnerResponse = http.get("/api/metadata/%s/%s", "unavailable", "unavailable");
         assertThat(getUnavailableByNameAndOwnerResponse)
-                .hasStatusCode(404);
+                .hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
@@ -110,7 +111,7 @@ abstract class JobRunrDashboardWebServerTest {
         final Job savedJob = storageProvider.save(job);
 
         HttpResponse<String> getResponse = http.get("/api/jobs/%s", savedJob.getId());
-        assertThat(getResponse).hasStatusCode(200);
+        assertThat(getResponse).hasStatusCode(HttpStatusCode.OK.getCode());
     }
 
     @Test
@@ -120,7 +121,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponse = http.get("/api/jobs/%s", savedJob.getId());
         assertThat(getResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/getJobById_ForFailedJob.json");
     }
 
@@ -130,7 +131,7 @@ abstract class JobRunrDashboardWebServerTest {
         final Job savedJob = storageProvider.save(job);
 
         HttpResponse<String> requeueResponse = http.post("/api/jobs/%s/requeue", savedJob.getId());
-        assertThat(requeueResponse).hasStatusCode(204);
+        assertThat(requeueResponse).hasStatusCode(HttpStatusCode.NO_CONTENT.getCode());
 
         assertThat(storageProvider.getJobById(job.getId())).hasState(StateName.ENQUEUED);
     }
@@ -138,7 +139,7 @@ abstract class JobRunrDashboardWebServerTest {
     @Test
     void testRequeueJob_JobNotFoundReturns404() {
         HttpResponse<String> requeueResponse = http.post("/api/jobs/%s/requeue", randomUUID());
-        assertThat(requeueResponse).hasStatusCode(404);
+        assertThat(requeueResponse).hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
@@ -147,23 +148,23 @@ abstract class JobRunrDashboardWebServerTest {
         final Job savedJob = storageProvider.save(job);
 
         HttpResponse<String> deleteResponse = http.delete("/api/jobs/%s", savedJob.getId());
-        assertThat(deleteResponse).hasStatusCode(204);
+        assertThat(deleteResponse).hasStatusCode(HttpStatusCode.NO_CONTENT.getCode());
 
         HttpResponse<String> getResponse = http.get("/api/jobs/%s", savedJob.getId());
-        assertThat(getResponse).hasStatusCode(200);
+        assertThat(getResponse).hasStatusCode(HttpStatusCode.OK.getCode());
         assertThat(storageProvider.getJobById(savedJob.getId())).hasState(StateName.DELETED);
     }
 
     @Test
     void testDeleteJob_JobNotFoundReturns404() {
         HttpResponse<String> deleteResponse = http.delete("/api/jobs/%s", randomUUID());
-        assertThat(deleteResponse).hasStatusCode(404);
+        assertThat(deleteResponse).hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
     void testGetJobById_JobNotFoundReturns404() {
         HttpResponse<String> getResponse = http.get("/api/jobs/%s", randomUUID());
-        assertThat(getResponse).hasStatusCode(404);
+        assertThat(getResponse).hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
@@ -172,7 +173,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponse = http.get("/api/jobs?state=ENQUEUED");
         assertThat(getResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/findJobsByState.json");
     }
 
@@ -182,7 +183,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponse = http.get("/api/problems");
         assertThat(getResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/problems-job-not-found.json");
     }
 
@@ -192,21 +193,21 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponseBeforeDelete = http.get("/api/problems");
         assertThat(getResponseBeforeDelete)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/problems-severe-jobrunr-problem.json");
 
 
         http.delete("/api/problems/" + SevereJobRunrExceptionProblem.PROBLEM_TYPE);
         HttpResponse<String> getResponseAfterDelete = http.get("/api/problems");
         assertThat(getResponseAfterDelete)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasJsonBody("[]");
     }
 
     @Test
     void testDeleteProblem_UnknownProblemReturns500() {
         HttpResponse<String> deleteResponse = http.delete("/api/problems/unknown-problem-type");
-        assertThat(deleteResponse).hasStatusCode(500);
+        assertThat(deleteResponse).hasStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR.getCode());
     }
 
     @Test
@@ -216,7 +217,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponse = http.get("/api/recurring-jobs");
         assertThat(getResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/getRecurringJobs.json");
     }
 
@@ -225,7 +226,7 @@ abstract class JobRunrDashboardWebServerTest {
         storageProvider.saveRecurringJob(aDefaultRecurringJob().withId("recurring-job-1").withName("Import sales data").build());
 
         HttpResponse<String> getResponse = http.post("/api/recurring-jobs/recurring-job-1/trigger");
-        assertThat(getResponse).hasStatusCode(204);
+        assertThat(getResponse).hasStatusCode(HttpStatusCode.NO_CONTENT.getCode());
 
         List<Job> jobs = storageProvider.getJobs(StateName.ENQUEUED, Paging.OffsetBasedPage.ascOnUpdatedAt(10)).getItems();
         assertThat(jobs).hasSize(1);
@@ -234,7 +235,7 @@ abstract class JobRunrDashboardWebServerTest {
     @Test
     void testTriggerRecurringJob_JobNotFoundReturns404() {
         HttpResponse<String> getResponse = http.post("/api/recurring-jobs/unknown-recurring-job/trigger");
-        assertThat(getResponse).hasStatusCode(404);
+        assertThat(getResponse).hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
@@ -244,14 +245,14 @@ abstract class JobRunrDashboardWebServerTest {
         assertThat(storageProvider.getRecurringJobs()).hasSize(2);
 
         HttpResponse<String> deleteResponse = http.delete("/api/recurring-jobs/%s", "recurring-job-1");
-        assertThat(deleteResponse).hasStatusCode(204);
+        assertThat(deleteResponse).hasStatusCode(HttpStatusCode.NO_CONTENT.getCode());
         assertThat(storageProvider.getRecurringJobs()).hasSize(1);
     }
 
     @Test
     void testDeleteRecurringJob_JobNotFoundReturns404() {
         HttpResponse<String> deleteResponse = http.delete("/api/recurring-jobs/unknown-recurring-job");
-        assertThat(deleteResponse).hasStatusCode(404);
+        assertThat(deleteResponse).hasStatusCode(HttpStatusCode.NOT_FOUND.getCode());
     }
 
     @Test
@@ -261,7 +262,7 @@ abstract class JobRunrDashboardWebServerTest {
 
         HttpResponse<String> getResponse = http.get("/api/servers");
         assertThat(getResponse)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasSameJsonBodyAsResource("/dashboard/api/getBackgroundJobServers.json");
     }
 }

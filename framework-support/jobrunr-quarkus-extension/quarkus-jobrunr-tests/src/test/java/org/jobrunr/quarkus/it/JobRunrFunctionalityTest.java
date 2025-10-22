@@ -1,6 +1,7 @@
 package org.jobrunr.quarkus.it;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
 import org.jobrunr.dashboard.server.http.client.TeenyHttpClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ public class JobRunrFunctionalityTest {
     public void testEnqueueAndProcessJob() {
         final HttpResponse<String> response = restApi.post("/jobrunr/jobs");
         assertThat(response)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasBodyStartingWith("Job Enqueued:");
 
         await().untilAsserted(() -> assertThat(restApi.get("/jobrunr/jobs/" + substringAfter(response.body(), "Job Enqueued: ")))
@@ -33,7 +34,7 @@ public class JobRunrFunctionalityTest {
     public void testRecurringJobs() {
         final HttpResponse<String> response = restApi.get("/jobrunr/recurring-jobs");
         assertThat(response)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasBodyContaining("id=my-recurring-job", "jobSignature='org.jobrunr.quarkus.it.TestService.aRecurringJob()'")
                 .hasBodyContaining("id=another-recurring-job-with-jobContext", "jobSignature='org.jobrunr.quarkus.it.TestService.anotherRecurringJob(org.jobrunr.jobs.context.JobContext)'");
 //                .hasJsonBody(json -> json.inPath("[1].id").isEqualTo("another-recurring-job-with-jobContext"))
@@ -48,7 +49,7 @@ public class JobRunrFunctionalityTest {
     public void testJobRunrHealthCheck() {
         final HttpResponse<String> response = restApi.get("/q/health/ready");
         assertThat(response)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasJsonBody(json -> json.inPath("checks[0].name").isEqualTo("JobRunr"))
                 .hasJsonBody(json -> json.inPath("checks[0].status").isEqualTo("UP"));
     }
@@ -57,7 +58,7 @@ public class JobRunrFunctionalityTest {
     public void testJobRunrMetrics() {
         final HttpResponse<String> response = restApi.get("/q/metrics");
         assertThat(response)
-                .hasStatusCode(200)
+                .hasStatusCode(HttpStatusCode.OK.getCode())
                 .hasBodyContaining("jobrunr_jobs_by_state{state=\"ENQUEUED\"}")
                 .hasBodyContaining("jobrunr_jobs_by_state{state=\"SUCCEEDED\"}");
     }

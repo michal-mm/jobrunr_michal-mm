@@ -1,5 +1,7 @@
 package org.jobrunr.dashboard.server.http.handlers;
 
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,8 +9,8 @@ import static org.jobrunr.dashboard.server.http.handlers.HttpRequestHandlers.Req
 
 public class HttpRequestHandlers {
 
-    public static final HttpRequestHandler ok = (httpRequest, httpResponse) -> httpResponse.statusCode(200);
-    public static final HttpRequestHandler notFound = (httpRequest, httpResponse) -> httpResponse.statusCode(404);
+    public static final HttpRequestHandler ok = (httpRequest, httpResponse) -> httpResponse.statusCode(HttpStatusCode.OK.getCode());
+    public static final HttpRequestHandler notFound = (httpRequest, httpResponse) -> httpResponse.statusCode(HttpStatusCode.NOT_FOUND.getCode());
 
     private final Map<String, HttpRequestMethodHandlers> requestHandlers = new HashMap<>();
 

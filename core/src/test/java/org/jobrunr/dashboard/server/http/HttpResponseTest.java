@@ -42,7 +42,7 @@ class HttpResponseTest {
     void testError() throws IOException {
         httpResponse.error(new Exception());
 
-        verify(httpExchange).sendResponseHeaders(500, 0);
+        verify(httpExchange).sendResponseHeaders(HttpStatusCode.INTERNAL_SERVER_ERROR.getCode(), 0);
         verify(outputStream, atLeastOnce()).write(any(), anyInt(), anyInt());
     }
 

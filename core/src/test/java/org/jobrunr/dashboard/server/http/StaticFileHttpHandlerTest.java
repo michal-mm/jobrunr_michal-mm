@@ -48,7 +48,7 @@ class StaticFileHttpHandlerTest {
 
         staticFileHttpHandler.handle(httpExchange);
 
-        verify(httpExchange).sendResponseHeaders(200, 0);
+        verify(httpExchange).sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
     }
 
     @Test
@@ -57,7 +57,7 @@ class StaticFileHttpHandlerTest {
 
         staticFileHttpHandler.handle(httpExchange);
 
-        verify(httpExchange).sendResponseHeaders(200, 0);
+        verify(httpExchange).sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
     }
 
     @Test
@@ -66,7 +66,7 @@ class StaticFileHttpHandlerTest {
 
         staticFileHttpHandler.handle(httpExchange);
 
-        verify(httpExchange).sendResponseHeaders(200, 0);
+        verify(httpExchange).sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
         assertThat(outputStream.toString()).isEqualTo(getResourceContent("dashboard/test/test.html"));
     }
 
@@ -76,7 +76,7 @@ class StaticFileHttpHandlerTest {
 
         staticFileHttpHandler.handle(httpExchange);
 
-        verify(httpExchange).sendResponseHeaders(404, -1L);
+        verify(httpExchange).sendResponseHeaders(HttpStatusCode.NOT_FOUND.getCode(), -1L);
     }
 
     private String getResourceContent(String resourcePath) throws IOException {

@@ -1,6 +1,7 @@
 package org.jobrunr.server.carbonaware;
 
 import org.jetbrains.annotations.NotNull;
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
 import org.jobrunr.scheduling.carbonaware.CarbonAwarePeriod;
 import org.jobrunr.server.carbonaware.CarbonIntensityForecast.ApiResponseStatus;
 import org.jobrunr.server.carbonaware.CarbonIntensityForecast.TimestampedCarbonIntensityForecast;
@@ -31,7 +32,7 @@ class CarbonIntensityForecastTest {
 
     @Test
     void fromExceptionForApiClientExceptionIngestsErrorCode() {
-        var forecast = CarbonIntensityForecast.fromException(new CarbonIntensityApiClientException(404, "Not Found"));
+        var forecast = CarbonIntensityForecast.fromException(new CarbonIntensityApiClientException(HttpStatusCode.NOT_FOUND.getCode(), "Not Found"));
         assertThat(forecast.hasError()).isTrue();
         assertThat(forecast.getApiResponseStatus().getCode()).isEqualTo("404");
         assertThat(forecast.getApiResponseStatus().getMessage()).isEqualTo("HTTP Response Code 404");

@@ -29,12 +29,14 @@ public class HttpResponse {
     }
 
     public HttpResponse error(Throwable t) {
-        data(500, ContentType.TEXT_PLAIN, stream -> t.printStackTrace(new PrintStream(stream)));
+        int status = HttpStatusCode.INTERNAL_SERVER_ERROR.getCode();
+        data(status, ContentType.TEXT_PLAIN, stream -> t.printStackTrace(new PrintStream(stream)));
         return this;
     }
 
     private HttpResponse data(String contentType, ThrowingConsumer<OutputStream> streamConsumer) {
-        data(200, contentType, streamConsumer);
+        int status = HttpStatusCode.OK.getCode();
+        data(status, contentType, streamConsumer);
         return this;
     }
 

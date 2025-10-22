@@ -2,6 +2,7 @@ package org.jobrunr.dashboard.server.sse;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import org.jobrunr.dashboard.server.http.HttpStatusCode;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class SseExchange implements AutoCloseable {
         responseHeaders.add("Connection", "keep-alive");
         responseHeaders.add("Language", "en-US");
         responseHeaders.add("Charset", "UTF-8");
-        httpExchange.sendResponseHeaders(200, 0);
+        httpExchange.sendResponseHeaders(HttpStatusCode.OK.getCode(), 0);
         this.writer.write("\n\n");
     }
 
