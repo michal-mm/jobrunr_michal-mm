@@ -15,7 +15,7 @@ class HttpStatusCodeTest {
         // number of currently available enums for http status codes
         int expectedNumberOfStatusCodes = 5;
 
-        assertThat(HttpStatusCode.values().length).isEqualTo(expectedNumberOfStatusCodes);
+        assertThat(HttpStatusCode.values()).hasSize(expectedNumberOfStatusCodes);
     }
 
     @Test
