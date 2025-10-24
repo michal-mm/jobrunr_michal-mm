@@ -15,14 +15,8 @@ public class KotlinJobDetailsBuilder extends JobDetailsBuilder {
 
     private static List<Object> getLocalVariables(JobRunrJob jobRunrJob, Object... params) {
         List<Object> result = new ArrayList<>();
-
-        if (jobRunrJob  != null) {
-            result.add(jobRunrJob);
-        }
-        if (params != null) {
-            result.addAll(asList(params));
-        }
-
+        result.add(jobRunrJob);
+        result.addAll(asList(params));
         return result;
     }
 }
